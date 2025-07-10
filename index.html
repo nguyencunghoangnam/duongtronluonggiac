@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Đường tròn lượng giác – gốc 3 (cải thiện vị trí θ₂)</title>
+  <style>
+    body{
+      font-family:'Segoe UI',Tahoma,sans-serif;
+      display:flex;flex-direction:column;align-items:center;
+      background:linear-gradient(135deg,#e8f2ff 0%,#fefefa 100%);
+      margin:0;padding:20px;user-select:none
+    }
+    canvas{
+      background:#fff;border:2px solid #4caf5055;border-radius:12px;
+      box-shadow:0 4px 10px rgba(0,0,0,.1);margin-top:16px;
+      cursor:pointer;transition:transform .15s
+    }
+    canvas:active{transform:scale(.98)}
+    #controls{
+      margin-top:18px;display:flex;flex-direction:column;align-items:center;gap:12px
+    }
+    .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .row label{font-weight:600}
+    .row input[type=number], select{
+      width:120px;padding:6px;border:1px solid #ccc;border-radius:8px;
+      font-size:1rem;text-align:center;outline:none
+    }
+    #angleLabel{font-weight:600;margin-left:12px}
+    button{
+      margin-top:6px;padding:8px 18px;border:none;background:#4CAF50;color:#fff;
+      border-radius:8px;font-size:1rem;cursor:pointer;transition:background .2s,box-shadow .2s
+    }
+    button:hover{background:#45a049;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+  </style>
+</head>
+<body>
+  <h1>Đường tròn lượng giác</h1>
+
+  <!-- Tăng chiều rộng để đủ “lề” cho phần hiển thị góc thứ 2 -->
+  <canvas id="circleCanvas" width="700" height="540"></canvas>
+
+  <div id="controls">
+    <div class="row">
+      <label for="angleInput">Độ (°):</label>
+      <input type="number" id="angleInput" value="0" step="1">
+
+      <label for="radInput">Radian:</label>
+      <input type="number" id="radInput" value="0" step="0.01">
+
+      <span id="angleLabel">Góc hiện tại: 0° (0.00 rad)</span>
+    </div>
+
+    <div class="row">
+      <label for="modeSelect">Chế độ so sánh:</label>
+      <select id="modeSelect">
+        <option value="none">1 góc (mặc định)</option>
+        <option value="opposite">Góc đối (α &ndash;α)</option>
+        <option value="supplementary">Góc bù (α &amp; π − α)</option>
+        <option value="explementary">Hơn kém π (α &amp; α + π)</option>
+        <option value="complementary">Góc phụ (α &amp; π/2 − α)</option>
+      </select>
+    </div>
+
+    <button id="resetBtn">Đặt lại về 0°</button>
+  </div>
+
+  <script>
+    const canvas=document.getElementById('circleCanvas');
+    const ctx=canvas.getContext('2d');
+    const angleInput=document.getElementById('angleInput');
+    const radInput=document.getElementById('radInput');
+    const angleLabel=document.getElementById('angleLabel');
+    const resetBtn=document.getElementById('resetBtn');
+    const modeSelect=document.getElementById('modeSelect');
+
+    const centerX=canvas.width/2,centerY=canvas.height/2,radius=210;
+    const innerR=radius*0.2;
+    let totalAngle=0,dragging=false,lastRaw=0,ignoreSync=false;
+
+    // Colors (primary for góc 1, secondary for góc 2)
+    const colorSin1='#ff9800';
+    const colorCos1='#43a047';
+    const colorSin2='#ff5722';
+    const colorCos2='#3f51b5';
+    const colorTanCot='#9c27b0';
+
+    function drawText(text,x,y,align='left'){
+      ctx.textAlign=align;
+      ctx.fillText(text,x,y+4);
+      ctx.textAlign='left';
+    }
+
+    function drawAngleSector(angleRad, primary=true){
+      ctx.save();
+      ctx.fillStyle= primary ? 'rgba(25,118,210,0.15)' : 'rgba(0,150,136,0.15)';
+      ctx.beginPath();ctx.moveTo(centerX,centerY);
+      if(angleRad>=0){ctx.arc(centerX,centerY,innerR,0,-angleRad,true);}
+      else{ctx.arc(centerX,centerY,innerR,0,-angleRad,false);}
+      ctx.closePath();ctx.fill();ctx.restore();
+
+      // arrow on sector
+      const ax=centerX+innerR*Math.cos(angleRad);
+      const ay=centerY-innerR*Math.sin(angleRad);
+      const arrowLen=12,wing=6;
+      let dirX,dirY;
+      if(angleRad>=0){dirX=-Math.sin(angleRad);dirY=-Math.cos(angleRad);}
+      else{dirX=Math.sin(angleRad);dirY=Math.cos(angleRad);}
+      const len=Math.hypot(dirX,dirY);dirX/=len;dirY/=len;
+      const bx=ax-dirX*arrowLen,by=ay-dirY*arrowLen;
+      ctx.save();
+      ctx.strokeStyle= primary ? '#1976d2' : '#009688';
+      ctx.fillStyle= ctx.strokeStyle;
+      ctx.lineWidth=2;
+      ctx.beginPath();ctx.moveTo(bx,by);ctx.lineTo(ax,ay);ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(ax,ay);
+      ctx.lineTo(ax-Math.cos(Math.atan2(dirY,dirX)+Math.PI/6)*wing, ay-Math.sin(Math.atan2(dirY,dirX)+Math.PI/6)*wing);
+      ctx.lineTo(ax-Math.cos(Math.atan2(dirY,dirX)-Math.PI/6)*wing, ay-Math.sin(Math.atan2(dirY,dirX)-Math.PI/6)*wing);
+      ctx.closePath();ctx.fill();ctx.restore();
+    }
+
+    function drawSingle(angleDeg, primary=true, labelSuffix=''){
+      const angleRad=angleDeg*Math.PI/180;
+      const cos=Math.cos(angleRad),sin=Math.sin(angleRad);
+      const Mx=centerX+radius*cos,My=centerY-radius*sin,
+            Hx=Mx,Hy=centerY,
+            Kx=centerX,Ky=My;
+
+      // Sector
+      drawAngleSector(angleRad, primary);
+
+      // OM
+      ctx.beginPath();ctx.moveTo(centerX,centerY);ctx.lineTo(Mx,My);
+      ctx.strokeStyle= primary ? '#1976d2' : '#009688';
+      ctx.lineWidth=2;ctx.stroke();
+
+      // Point M
+      ctx.beginPath();ctx.arc(Mx,My,6,0,2*Math.PI);
+      ctx.fillStyle= primary ? '#e53935' : '#00bcd4';
+      ctx.fill();
+      drawText('M'+labelSuffix, Mx+14, My-10);
+
+      // Projection H on Ox
+      ctx.beginPath();ctx.moveTo(Mx,My);ctx.lineTo(Mx,centerY);
+      ctx.strokeStyle= primary ? colorCos1 : colorCos2;ctx.setLineDash([5,3]);ctx.stroke();ctx.setLineDash([]);
+      ctx.beginPath();ctx.arc(Hx,Hy,4,0,2*Math.PI);
+      ctx.fillStyle= primary ? colorCos1 : colorCos2;ctx.fill();
+      drawText('H'+labelSuffix, Hx+12, Hy+18);
+      ctx.fillStyle= primary ? colorCos1 : colorCos2;
+      drawText(cos.toFixed(3), Hx+12, Hy+38);
+
+      // Projection K on Oy
+      ctx.beginPath();ctx.moveTo(Mx,My);ctx.lineTo(centerX,My);
+      ctx.strokeStyle= primary ? colorSin1 : colorSin2;ctx.setLineDash([5,3]);ctx.stroke();ctx.setLineDash([]);
+      ctx.beginPath();ctx.arc(Kx,Ky,4,0,2*Math.PI);
+      ctx.fillStyle= primary ? colorSin1 : colorSin2;ctx.fill();
+      drawText('K'+labelSuffix, Kx-20, Ky-12);
+      ctx.fillStyle= primary ? colorSin1 : colorSin2;
+      drawText(sin.toFixed(3), Kx+24, Ky-12);
+
+      return {sin,cos};
+    }
+
+    function getSecondAngle(deg, mode){
+      switch(mode){
+        case 'opposite': return -deg;
+        case 'supplementary': return 180 - deg;
+        case 'explementary': return deg + 180;
+        case 'complementary': return 90 - deg;
+        default: return null;
+      }
+    }
+
+    function drawScene(angleDeg){
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+
+      // Circle
+      ctx.beginPath();ctx.arc(centerX,centerY,radius,0,2*Math.PI);
+      ctx.strokeStyle='#333';ctx.lineWidth=2;ctx.stroke();
+
+      // Axes with arrows
+      ctx.beginPath();
+      ctx.moveTo(centerX-radius-25,centerY);ctx.lineTo(centerX+radius+25,centerY);
+      ctx.moveTo(centerX+radius+18,centerY-7);ctx.lineTo(centerX+radius+25,centerY);ctx.lineTo(centerX+radius+18,centerY+7);
+      ctx.moveTo(centerX,centerY-radius-25);ctx.lineTo(centerX,centerY+radius+25);
+      ctx.moveTo(centerX-7,centerY-radius-18);ctx.lineTo(centerX,centerY-radius-25);ctx.lineTo(centerX+7,centerY-radius-18);
+      ctx.strokeStyle='#777';ctx.lineWidth=1;ctx.stroke();
+
+      // Ox positive arrow labelled cos
+      ctx.save();ctx.strokeStyle='#1976d2';ctx.lineWidth=2;
+      ctx.beginPath();ctx.moveTo(centerX,centerY);ctx.lineTo(centerX+radius,centerY);ctx.stroke();ctx.restore();
+      ctx.font='15px Segoe UI,Tahoma,sans-serif';
+      ctx.fillStyle=colorCos1;
+      ctx.fillText('cos', centerX+radius+35, centerY+5);
+
+      // Oy positive arrow labelled sin
+      ctx.fillStyle=colorSin1;
+      ctx.fillText('sin', centerX-15, centerY-radius-35);
+
+      // Point O
+      ctx.beginPath();ctx.arc(centerX,centerY,4,0,2*Math.PI);ctx.fillStyle='#000';ctx.fill();
+      drawText('O',centerX-14,centerY+16);
+
+      // Draw first angle (primary)
+      const res1 = drawSingle(angleDeg, true, '');
+
+      // Determine and draw second angle if mode selected
+      const mode = modeSelect.value;
+      const secondAngleDeg = getSecondAngle(angleDeg, mode);
+      let res2=null;
+      if(secondAngleDeg!==null && mode!=='none'){
+        res2 = drawSingle(secondAngleDeg, false, "'");
+      }
+
+      // Display numerical values
+      ctx.font='15px Segoe UI,Tahoma,sans-serif';
+
+      const leftX = 20;                     // Lề trái
+            const rightX = canvas.width - 20;    // moved further right
+
+
+      // Primary angle values (left)
+      ctx.fillStyle=colorSin1;
+      ctx.fillText(`sin(θ) = ${res1.sin.toFixed(3)}`,leftX,canvas.height-120);
+      ctx.fillStyle=colorCos1;
+      ctx.fillText(`cos(θ) = ${res1.cos.toFixed(3)}`,leftX,canvas.height-100);
+
+      const EPS=1e-8;
+      let tanStr=Math.abs(res1.cos)<EPS?'∞':(res1.sin/res1.cos).toFixed(3);
+      let cotStr=Math.abs(res1.sin)<EPS?'∞':(res1.cos/res1.sin).toFixed(3);
+
+      ctx.fillStyle=colorTanCot;
+      ctx.fillText(`tan(θ) = ${tanStr}`,leftX,canvas.height-80);
+      ctx.fillText(`cot(θ) = ${cotStr}`,leftX,canvas.height-60);
+
+      // Secondary angle values (right) if exists
+      if(res2){
+        ctx.fillStyle=colorSin2;
+        ctx.textAlign='right';
+        ctx.fillText(`sin(θ₂) = ${res2.sin.toFixed(3)}`,rightX,canvas.height-120);
+        ctx.fillStyle=colorCos2;
+        ctx.fillText(`cos(θ₂) = ${res2.cos.toFixed(3)}`,rightX,canvas.height-100);
+
+        let tan2=Math.abs(res2.cos)<EPS?'∞':(res2.sin/res2.cos).toFixed(3);
+        let cot2=Math.abs(res2.sin)<EPS?'∞':(res2.cos/res2.sin).toFixed(3);
+
+        ctx.fillStyle=colorTanCot;
+        ctx.fillText(`tan(θ₂) = ${tan2}`,rightX,canvas.height-80);
+        ctx.fillText(`cot(θ₂) = ${cot2}`,rightX,canvas.height-60);
+        ctx.textAlign='left';
+      }
+    }
+
+    function updateDisplay(){
+      ignoreSync=true;
+      angleLabel.textContent=`Góc hiện tại: ${Math.round(totalAngle)}° (${(totalAngle*Math.PI/180).toFixed(2)} rad)`;
+      angleInput.value=Math.round(totalAngle);
+      radInput.value=(totalAngle*Math.PI/180).toFixed(2);
+      ignoreSync=false;
+      drawScene(totalAngle);
+    }
+
+    function getPos(evt){
+      const rect=canvas.getBoundingClientRect();
+      const clientX=evt.touches?evt.touches[0].clientX:evt.clientX;
+      const clientY=evt.touches?evt.touches[0].clientY:evt.clientY;
+      return{x:clientX-rect.left,y:clientY-rect.top};
+    }
+
+    function rawAngleDeg(pos){
+      const dx=pos.x-centerX,dy=centerY-pos.y;
+      return Math.atan2(dy,dx)*180/Math.PI;
+    }
+
+    function onPointerDown(e){
+      const pos=getPos(e);
+      const Mx=centerX+radius*Math.cos(totalAngle*Math.PI/180);
+      const My=centerY-radius*Math.sin(totalAngle*Math.PI/180);
+      const dist=Math.hypot(pos.x-Mx,pos.y-My);
+      if(dist<=10){dragging=true;lastRaw=rawAngleDeg(pos);e.preventDefault();}
+    }
+
+    function onPointerMove(e){
+      if(!dragging)return;
+      const pos=getPos(e),newRaw=rawAngleDeg(pos);
+      let diff=newRaw-lastRaw;
+      if(diff>180)diff-=360;if(diff<-180)diff+=360;
+      totalAngle+=diff;lastRaw=newRaw;updateDisplay();e.preventDefault();
+    }
+
+    function onPointerUp(){dragging=false;}
+
+    angleInput.addEventListener('input',()=>{
+      if(ignoreSync)return;
+      ignoreSync=true;totalAngle=parseFloat(angleInput.value)||0;
+      radInput.value=(totalAngle*Math.PI/180).toFixed(2);ignoreSync=false;updateDisplay();
+    });
+
+    radInput.addEventListener('input',()=>{
+      if(ignoreSync)return;
+      ignoreSync=true;const rad=parseFloat(radInput.value)||0;
+      totalAngle=rad*180/Math.PI;angleInput.value=Math.round(totalAngle);ignoreSync=false;updateDisplay();
+    });
+
+    resetBtn.addEventListener('click',()=>{totalAngle=0;updateDisplay();});
+    modeSelect.addEventListener('change',updateDisplay);
+
+    canvas.addEventListener('mousedown',onPointerDown);
+    canvas.addEventListener('mousemove',onPointerMove);
+    window.addEventListener('mouseup',onPointerUp);
+    canvas.addEventListener('touchstart',onPointerDown,{passive:false});
+    canvas.addEventListener('touchmove',onPointerMove,{passive:false});
+    window.addEventListener('touchend',onPointerUp);
+
+    updateDisplay();
+  </script>
+</body>
+</html>
