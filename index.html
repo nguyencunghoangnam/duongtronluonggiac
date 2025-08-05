@@ -2,68 +2,173 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Đường tròn lượng giác – gốc 3 (cải thiện vị trí θ₂)</title>
+  <title>Đường tròn lượng giác – gốc 3 (giao diện mới)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    body{
-      font-family:'Segoe UI',Tahoma,sans-serif;
-      display:flex;flex-direction:column;align-items:center;
-      background:linear-gradient(135deg,#e8f2ff 0%,#fefefa 100%);
-      margin:0;padding:20px;user-select:none
+    body {
+      font-family: 'Montserrat', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #e7f0fd 0%, #fffbe7 100%);
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
-    canvas{
-      background:#fff;border:2px solid #4caf5055;border-radius:12px;
-      box-shadow:0 4px 10px rgba(0,0,0,.1);margin-top:16px;
-      cursor:pointer;transition:transform .15s
+    h1 {
+      margin-top: 32px;
+      margin-bottom: 8px;
+      font-size: 2.15rem;
+      color: #2563eb;
+      font-family: 'Montserrat', sans-serif;
+      letter-spacing: 1.2px;
+      text-shadow: 0 2px 8px #b6d4fc55;
+      font-weight: 700;
+      text-align: center;
     }
-    canvas:active{transform:scale(.98)}
-    #controls{
-      margin-top:18px;display:flex;flex-direction:column;align-items:center;gap:12px
+    .main-frame {
+      margin: 28px 0 0 0;
+      background: rgba(255, 255, 255, 0.98);
+      border-radius: 22px;
+      box-shadow: 0 8px 36px rgba(44,62,80,0.12), 0 1.5px 8px rgba(52,152,219,0.08);
+      padding: 35px 44px 26px 44px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
-    .row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-    .row label{font-weight:600}
-    .row input[type=number], select{
-      width:120px;padding:6px;border:1px solid #ccc;border-radius:8px;
-      font-size:1rem;text-align:center;outline:none
+    canvas {
+      background: #fbfcfe;
+      border: 2.5px solid #4caf50cc;
+      border-radius: 14px;
+      box-shadow: 0 8px 24px rgba(44, 62, 80, 0.11), 0 0.5px 6px #00bcd430;
+      margin-top: 8px;
+      transition: box-shadow .16s, transform .15s;
+      cursor: pointer;
+      max-width: 98vw;
     }
-    #angleLabel{font-weight:600;margin-left:12px}
-    button{
-      margin-top:6px;padding:8px 18px;border:none;background:#4CAF50;color:#fff;
-      border-radius:8px;font-size:1rem;cursor:pointer;transition:background .2s,box-shadow .2s
+    canvas:active {
+      transform: scale(.98);
+      box-shadow: 0 3px 10px rgba(44,62,80,0.05);
     }
-    button:hover{background:#45a049;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+    #controls {
+      margin-top: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 22px;
+      width: 100%;
+    }
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      background: linear-gradient(90deg, #e3f1ff 60%, #f9fbe8 100%);
+      border-radius: 14px;
+      padding: 18px 22px;
+      box-shadow: 0 2px 14px #aed8f633;
+      margin-bottom: 0;
+      margin-top: 0;
+      width: 100%;
+      max-width: 660px;
+    }
+    .row label {
+      font-weight: 700;
+      color: #1a3356;
+      font-size: 1.12rem;
+      margin-bottom: 0;
+      letter-spacing: 0.2px;
+      font-family: 'Montserrat', sans-serif;
+    }
+    .row input[type=number], .row select {
+      width: 110px;
+      padding: 7px 9px;
+      border-radius: 7px;
+      border: 1.6px solid #b8c1ec;
+      background: #f6faff;
+      font-size: 1.06rem;
+      font-family: 'Roboto', Arial, sans-serif;
+      margin-right: 7px;
+      transition: border 0.22s, box-shadow 0.2s;
+      outline: none;
+      box-shadow: 0 1.5px 5px #a7e5b420;
+      color: #184140;
+    }
+    .row input[type=number]:focus, .row select:focus {
+      border: 1.6px solid #2563eb;
+      background: #f0f7ff;
+      box-shadow: 0 2px 10px #a7d7ff33;
+    }
+    #angleLabel {
+      font-weight: 700;
+      color: #e67e22;
+      font-size: 1.08rem;
+      margin-left: 12px;
+      background: #fffbe9;
+      border-radius: 6px;
+      padding: 5px 15px 5px 15px;
+      font-family: 'Montserrat', Arial, sans-serif;
+      box-shadow: 0 1.5px 4px #f5d7b3;
+    }
+    button {
+      margin-top: 6px;
+      padding: 11px 34px;
+      border: none;
+      background: linear-gradient(90deg, #2563eb 60%, #43b047 100%);
+      color: #fff;
+      border-radius: 10px;
+      font-size: 1.13rem;
+      font-family: 'Montserrat', Arial, sans-serif;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: 0.7px;
+      box-shadow: 0 8px 22px rgba(44,62,80,0.16), 0 1.5px 8px rgba(52,152,219,0.10);
+      transition: background 0.17s, box-shadow 0.13s, transform 0.12s;
+    }
+    button:hover {
+      background: linear-gradient(90deg, #1747b6 60%, #1abc9c 100%);
+      box-shadow: 0 12px 30px rgba(44,62,80,0.18);
+      transform: translateY(-2px) scale(1.019);
+    }
+    @media (max-width: 900px) {
+      .main-frame { padding: 10px 2vw; }
+      canvas { width: 100% !important; height: auto !important; }
+      .row { padding: 16px 1vw; }
+    }
+    @media (max-width: 600px) {
+      .main-frame { padding: 0; }
+      .row { flex-direction: column; align-items: stretch; gap: 10px; }
+      h1 { font-size: 1.35rem; }
+      button { width: 100%; }
+    }
   </style>
 </head>
 <body>
   <h1>Đường tròn lượng giác</h1>
+  <div class="main-frame">
+    <canvas id="circleCanvas" width="700" height="540"></canvas>
+    <div id="controls">
+      <div class="row">
+        <label for="angleInput">Độ (°):</label>
+        <input type="number" id="angleInput" value="0" step="1">
 
-  <!-- Tăng chiều rộng để đủ “lề” cho phần hiển thị góc thứ 2 -->
-  <canvas id="circleCanvas" width="700" height="540"></canvas>
+        <label for="radInput">Radian:</label>
+        <input type="number" id="radInput" value="0" step="0.01">
 
-  <div id="controls">
-    <div class="row">
-      <label for="angleInput">Độ (°):</label>
-      <input type="number" id="angleInput" value="0" step="1">
-
-      <label for="radInput">Radian:</label>
-      <input type="number" id="radInput" value="0" step="0.01">
-
-      <span id="angleLabel">Góc hiện tại: 0° (0.00 rad)</span>
+        <span id="angleLabel">Góc hiện tại: 0° (0.00 rad)</span>
+      </div>
+      <div class="row">
+        <label for="modeSelect">Chế độ so sánh:</label>
+        <select id="modeSelect">
+          <option value="none">1 góc (mặc định)</option>
+          <option value="opposite">Góc đối (α &ndash;α)</option>
+          <option value="supplementary">Góc bù (α &amp; π − α)</option>
+          <option value="explementary">Hơn kém π (α &amp; α + π)</option>
+          <option value="complementary">Góc phụ (α &amp; π/2 − α)</option>
+        </select>
+      </div>
+      <button id="resetBtn">Đặt lại về 0°</button>
     </div>
-
-    <div class="row">
-      <label for="modeSelect">Chế độ so sánh:</label>
-      <select id="modeSelect">
-        <option value="none">1 góc (mặc định)</option>
-        <option value="opposite">Góc đối (α &ndash;α)</option>
-        <option value="supplementary">Góc bù (α &amp; π − α)</option>
-        <option value="explementary">Hơn kém π (α &amp; α + π)</option>
-        <option value="complementary">Góc phụ (α &amp; π/2 − α)</option>
-      </select>
-    </div>
-
-    <button id="resetBtn">Đặt lại về 0°</button>
   </div>
-
   <script>
     const canvas=document.getElementById('circleCanvas');
     const ctx=canvas.getContext('2d');
@@ -77,7 +182,7 @@
     const innerR=radius*0.2;
     let totalAngle=0,dragging=false,lastRaw=0,ignoreSync=false;
 
-    // Colors (primary for góc 1, secondary for góc 2)
+    // Colors
     const colorSin1='#ff9800';
     const colorCos1='#43a047';
     const colorSin2='#ff5722';
@@ -86,13 +191,14 @@
 
     function drawText(text,x,y,align='left'){
       ctx.textAlign=align;
+      ctx.font = "16px 'Montserrat', Arial";
       ctx.fillText(text,x,y+4);
       ctx.textAlign='left';
     }
 
     function drawAngleSector(angleRad, primary=true){
       ctx.save();
-      ctx.fillStyle= primary ? 'rgba(25,118,210,0.15)' : 'rgba(0,150,136,0.15)';
+      ctx.fillStyle= primary ? 'rgba(25,118,210,0.15)' : 'rgba(0,150,136,0.13)';
       ctx.beginPath();ctx.moveTo(centerX,centerY);
       if(angleRad>=0){ctx.arc(centerX,centerY,innerR,0,-angleRad,true);}
       else{ctx.arc(centerX,centerY,innerR,0,-angleRad,false);}
@@ -101,7 +207,7 @@
       // arrow on sector
       const ax=centerX+innerR*Math.cos(angleRad);
       const ay=centerY-innerR*Math.sin(angleRad);
-      const arrowLen=12,wing=6;
+      const arrowLen=14,wing=7;
       let dirX,dirY;
       if(angleRad>=0){dirX=-Math.sin(angleRad);dirY=-Math.cos(angleRad);}
       else{dirX=Math.sin(angleRad);dirY=Math.cos(angleRad);}
@@ -132,31 +238,34 @@
       // OM
       ctx.beginPath();ctx.moveTo(centerX,centerY);ctx.lineTo(Mx,My);
       ctx.strokeStyle= primary ? '#1976d2' : '#009688';
-      ctx.lineWidth=2;ctx.stroke();
+      ctx.lineWidth=2.5;ctx.stroke();
 
       // Point M
-      ctx.beginPath();ctx.arc(Mx,My,6,0,2*Math.PI);
+      ctx.beginPath();ctx.arc(Mx,My,7,0,2*Math.PI);
       ctx.fillStyle= primary ? '#e53935' : '#00bcd4';
+      ctx.shadowColor = primary ? '#ffb3b3' : '#b3f1ff';
+      ctx.shadowBlur = 10;
       ctx.fill();
-      drawText('M'+labelSuffix, Mx+14, My-10);
+      ctx.shadowBlur = 0;
+      drawText('M'+labelSuffix, Mx+16, My-12);
 
       // Projection H on Ox
       ctx.beginPath();ctx.moveTo(Mx,My);ctx.lineTo(Mx,centerY);
       ctx.strokeStyle= primary ? colorCos1 : colorCos2;ctx.setLineDash([5,3]);ctx.stroke();ctx.setLineDash([]);
-      ctx.beginPath();ctx.arc(Hx,Hy,4,0,2*Math.PI);
+      ctx.beginPath();ctx.arc(Hx,Hy,5,0,2*Math.PI);
       ctx.fillStyle= primary ? colorCos1 : colorCos2;ctx.fill();
-      drawText('H'+labelSuffix, Hx+12, Hy+18);
+      drawText('H'+labelSuffix, Hx+14, Hy+20);
       ctx.fillStyle= primary ? colorCos1 : colorCos2;
-      drawText(cos.toFixed(3), Hx+12, Hy+38);
+      drawText(cos.toFixed(3), Hx+14, Hy+40);
 
       // Projection K on Oy
       ctx.beginPath();ctx.moveTo(Mx,My);ctx.lineTo(centerX,My);
       ctx.strokeStyle= primary ? colorSin1 : colorSin2;ctx.setLineDash([5,3]);ctx.stroke();ctx.setLineDash([]);
-      ctx.beginPath();ctx.arc(Kx,Ky,4,0,2*Math.PI);
+      ctx.beginPath();ctx.arc(Kx,Ky,5,0,2*Math.PI);
       ctx.fillStyle= primary ? colorSin1 : colorSin2;ctx.fill();
-      drawText('K'+labelSuffix, Kx-20, Ky-12);
+      drawText('K'+labelSuffix, Kx-22, Ky-14);
       ctx.fillStyle= primary ? colorSin1 : colorSin2;
-      drawText(sin.toFixed(3), Kx+24, Ky-12);
+      drawText(sin.toFixed(3), Kx+28, Ky-14);
 
       return {sin,cos};
     }
@@ -175,31 +284,41 @@
       ctx.clearRect(0,0,canvas.width,canvas.height);
 
       // Circle
+      ctx.save();
       ctx.beginPath();ctx.arc(centerX,centerY,radius,0,2*Math.PI);
-      ctx.strokeStyle='#333';ctx.lineWidth=2;ctx.stroke();
+      ctx.strokeStyle='#333';ctx.lineWidth=2.2;ctx.stroke();
+      ctx.restore();
 
       // Axes with arrows
+      ctx.save();
       ctx.beginPath();
       ctx.moveTo(centerX-radius-25,centerY);ctx.lineTo(centerX+radius+25,centerY);
       ctx.moveTo(centerX+radius+18,centerY-7);ctx.lineTo(centerX+radius+25,centerY);ctx.lineTo(centerX+radius+18,centerY+7);
       ctx.moveTo(centerX,centerY-radius-25);ctx.lineTo(centerX,centerY+radius+25);
       ctx.moveTo(centerX-7,centerY-radius-18);ctx.lineTo(centerX,centerY-radius-25);ctx.lineTo(centerX+7,centerY-radius-18);
-      ctx.strokeStyle='#777';ctx.lineWidth=1;ctx.stroke();
+      ctx.strokeStyle='#888';ctx.lineWidth=1.25;ctx.stroke();
+      ctx.restore();
 
       // Ox positive arrow labelled cos
-      ctx.save();ctx.strokeStyle='#1976d2';ctx.lineWidth=2;
-      ctx.beginPath();ctx.moveTo(centerX,centerY);ctx.lineTo(centerX+radius,centerY);ctx.stroke();ctx.restore();
-      ctx.font='15px Segoe UI,Tahoma,sans-serif';
+      ctx.save();
+      ctx.strokeStyle='#1976d2';ctx.lineWidth=2.2;
+      ctx.beginPath();ctx.moveTo(centerX,centerY);ctx.lineTo(centerX+radius,centerY);ctx.stroke();
+      ctx.restore();
+      ctx.font='17px Montserrat, Arial';
       ctx.fillStyle=colorCos1;
-      ctx.fillText('cos', centerX+radius+35, centerY+5);
+      ctx.fillText('cos', centerX+radius+35, centerY+7);
 
       // Oy positive arrow labelled sin
+      ctx.font='17px Montserrat, Arial';
       ctx.fillStyle=colorSin1;
-      ctx.fillText('sin', centerX-15, centerY-radius-35);
+      ctx.fillText('sin', centerX-19, centerY-radius-34);
 
       // Point O
-      ctx.beginPath();ctx.arc(centerX,centerY,4,0,2*Math.PI);ctx.fillStyle='#000';ctx.fill();
-      drawText('O',centerX-14,centerY+16);
+      ctx.beginPath();ctx.arc(centerX,centerY,5,0,2*Math.PI);
+      ctx.fillStyle='#000';ctx.shadowColor = '#555';ctx.shadowBlur = 7;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      drawText('O',centerX-17,centerY+19);
 
       // Draw first angle (primary)
       const res1 = drawSingle(angleDeg, true, '');
@@ -212,26 +331,24 @@
         res2 = drawSingle(secondAngleDeg, false, "'");
       }
 
-      // Display numerical values
-      ctx.font='15px Segoe UI,Tahoma,sans-serif';
-
-      const leftX = 20;                     // Lề trái
-            const rightX = canvas.width - 20;    // moved further right
-
+      // Display numerical values (bottom area)
+      ctx.font="17px 'Roboto', Arial";
+      const leftX = 24;
+      const rightX = canvas.width - 24;
 
       // Primary angle values (left)
       ctx.fillStyle=colorSin1;
       ctx.fillText(`sin(θ) = ${res1.sin.toFixed(3)}`,leftX,canvas.height-120);
       ctx.fillStyle=colorCos1;
-      ctx.fillText(`cos(θ) = ${res1.cos.toFixed(3)}`,leftX,canvas.height-100);
+      ctx.fillText(`cos(θ) = ${res1.cos.toFixed(3)}`,leftX,canvas.height-97);
 
       const EPS=1e-8;
       let tanStr=Math.abs(res1.cos)<EPS?'∞':(res1.sin/res1.cos).toFixed(3);
       let cotStr=Math.abs(res1.sin)<EPS?'∞':(res1.cos/res1.sin).toFixed(3);
 
       ctx.fillStyle=colorTanCot;
-      ctx.fillText(`tan(θ) = ${tanStr}`,leftX,canvas.height-80);
-      ctx.fillText(`cot(θ) = ${cotStr}`,leftX,canvas.height-60);
+      ctx.fillText(`tan(θ) = ${tanStr}`,leftX,canvas.height-74);
+      ctx.fillText(`cot(θ) = ${cotStr}`,leftX,canvas.height-51);
 
       // Secondary angle values (right) if exists
       if(res2){
@@ -239,14 +356,14 @@
         ctx.textAlign='right';
         ctx.fillText(`sin(θ₂) = ${res2.sin.toFixed(3)}`,rightX,canvas.height-120);
         ctx.fillStyle=colorCos2;
-        ctx.fillText(`cos(θ₂) = ${res2.cos.toFixed(3)}`,rightX,canvas.height-100);
+        ctx.fillText(`cos(θ₂) = ${res2.cos.toFixed(3)}`,rightX,canvas.height-97);
 
         let tan2=Math.abs(res2.cos)<EPS?'∞':(res2.sin/res2.cos).toFixed(3);
         let cot2=Math.abs(res2.sin)<EPS?'∞':(res2.cos/res2.sin).toFixed(3);
 
         ctx.fillStyle=colorTanCot;
-        ctx.fillText(`tan(θ₂) = ${tan2}`,rightX,canvas.height-80);
-        ctx.fillText(`cot(θ₂) = ${cot2}`,rightX,canvas.height-60);
+        ctx.fillText(`tan(θ₂) = ${tan2}`,rightX,canvas.height-74);
+        ctx.fillText(`cot(θ₂) = ${cot2}`,rightX,canvas.height-51);
         ctx.textAlign='left';
       }
     }
@@ -277,7 +394,7 @@
       const Mx=centerX+radius*Math.cos(totalAngle*Math.PI/180);
       const My=centerY-radius*Math.sin(totalAngle*Math.PI/180);
       const dist=Math.hypot(pos.x-Mx,pos.y-My);
-      if(dist<=10){dragging=true;lastRaw=rawAngleDeg(pos);e.preventDefault();}
+      if(dist<=13){dragging=true;lastRaw=rawAngleDeg(pos);e.preventDefault();}
     }
 
     function onPointerMove(e){
